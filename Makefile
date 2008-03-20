@@ -1,6 +1,6 @@
 CC = env python
 FLAGS = -tt
-MAIN = pysydelet.py
+MAIN = main.py
 SRCS= $(wildcard *.py)
 
 .PHONY:	all run doctest clean
