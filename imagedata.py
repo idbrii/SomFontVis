@@ -51,3 +51,13 @@ if __name__ == '__main__':
 
     print letterData
     print "Length:", len(im.getData())
+
+
+def _test():
+    """ Run unit tests. """
+    import doctest
+    doctest.testmod()
+
+if __name__ == "__main__":
+    """ If script is run directly, then run unit tests """
+    _test()

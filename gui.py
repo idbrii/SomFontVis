@@ -71,3 +71,12 @@ class SomFontFrame(gui.FontFrame):
         self.Layout()
 
 
+
+def _test():
+    """ Run unit tests. """
+    import doctest
+    doctest.testmod()
+
+if __name__ == "__main__":
+    """ If script is run directly, then run unit tests """
+    _test()

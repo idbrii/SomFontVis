@@ -4,7 +4,7 @@ import som
 
 class SelfOrgMapGlue():
     def __init__(self, nOutputs):
-        nInputs = _getNInputs()
+        nInputs = self._getNInputs()
         self.som = som.SelfOrgMap(nInputs, nOutputs)
 
     def _getNInputs(self):
@@ -14,16 +14,15 @@ class SelfOrgMapGlue():
         letter = imagedata.Letter(filename)
         result = self.som.process( letter )
 
-        return _findSmallest(result)
+        return self.som._findSmallest(result)
 
-    def _findSmallest(self, result):
-        """ self._findSmallest( list ) -> int
-            finds the smallest element in `result` and returns its index
-        """
-        # map result into list of result,index pairs
-        result = map(None, result, range(len(result)))
-        # find smallest result
-        result = min(result)
 
-        # return index from pair
-        return result[1]
+
+def _test():
+    """ Run unit tests. """
+    import doctest
+    doctest.testmod()
+
+if __name__ == "__main__":
+    """ If script is run directly, then run unit tests """
+    _test()
