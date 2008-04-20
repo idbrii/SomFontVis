@@ -6,7 +6,7 @@
 
 import sys
 from PIL import Image
-from pilfun import *
+from imagedata import *
 
 def usage():
     print "Usage:\n\t", sys.argv[0], "font-name [font-name [...]]"
