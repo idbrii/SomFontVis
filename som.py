@@ -34,7 +34,7 @@ class Weight():
         """
         return pow(weight-input, 2)
 
-    def makeCloser(self, alpha, data):
+    def _makeCloser(self, alpha, data):
         """ Make the weight closer in value to the input, according to the alpha
         """
         assert len(self.data) == len(data), "Inputs should have same size as weights (%i,%i)" % (len(self.data), len(data))
@@ -57,15 +57,18 @@ class SelfOrgMap():
         """
         # create nOutputs weights
         self.weights = [Weight(nInputs) for a in range(nOutputs)]
-        self._randomize()
+        self._initializeWeights()
 
-    def _randomize(self):
+    def _initializeWeights(self):
         random.seed()
         for w in self.weights:
             w.randomize()
 
     def process(self, letter):
-        """
+        """ self.process( Letter ) -> list
+        Using the input letter, determine the outputs of the SOM.
+        len(output) == nOutputs == len(self.weights)
+
         >>> import imagedata
         >>> letter = imagedata.Letter('TimesNewRoman', 'B')
         >>> s = SelfOrgMap( letter.getWidth()*letter.getHeight(), 5)
@@ -94,13 +97,14 @@ class SelfOrgMap():
                 print "Warning: Requested more epochs, but learning parameter is now zero. (t=%i)"%t
 
     def _trainOnLetter(self, letter, alpha):
+        """ Train for the given letter. Applys constriction with given alpha."""
         # get result
         result = self.process(letter)
         smallest = self._findSmallest(result)
 
         # modify smallest weight
         data = list(letter.getData())
-        self.weights[smallest].makeCloser(alpha, data)
+        self.weights[smallest]._makeCloser(alpha, data)
 
     def _findSmallest(self, result):
         """ self._findSmallest( list ) -> int
