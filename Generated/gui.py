@@ -9,7 +9,7 @@ class FontFrame(wx.Frame):
         # begin wxGlade: FontFrame.__init__
         kwds["style"] = wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
-        self.letterImage = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/data/TimesNewRoman_B.png", wx.BITMAP_TYPE_ANY))
+        self.letterImage = wx.StaticBitmap(self, -1, wx.Bitmap("data/TimesNewRoman_B.png", wx.BITMAP_TYPE_ANY))
         self.output = wx.RadioBox(self, -1, "Output: Character", choices=["A", "B", "C", "D", "E", "F"], majorDimension=0, style=wx.RA_SPECIFY_ROWS)
         self.selectImageButton = wx.Button(self, -1, "newImageButton")
 
@@ -54,44 +54,6 @@ class FontFrame(wx.Frame):
 # end of class FontFrame
 
 
-class SomFontFrame(wx.Frame):
-    def __init__(self, *args, **kwds):
-        # content of this block not found: did you rename this class?
-        pass
-
-    def __set_properties(self):
-        # content of this block not found: did you rename this class?
-        pass
-
-    def __do_layout(self):
-        # content of this block not found: did you rename this class?
-        pass
-
-    def OnSelectImage(self, event): # wxGlade: SomFontFrame.<event_handler>
-        print "Event handler `OnSelectImage' not implemented!"
-        event.Skip()
-
-    def OnModifyOutput(self, event): # wxGlade: SomFontFrame.<event_handler>
-        print "Event handler `OnModifyOutput' not implemented"
-        event.Skip()
-
-# end of class SomFontFrame
-
-
-class MyMenuBar(wx.MenuBar):
-    def __init__(self, *args, **kwds):
-        # content of this block not found: did you rename this class?
-        pass
-
-    def __set_properties(self):
-        # content of this block not found: did you rename this class?
-        pass
-
-    def __do_layout(self):
-        # content of this block not found: did you rename this class?
-        pass
-
-# end of class MyMenuBar
 
 
 if __name__ == "__main__":

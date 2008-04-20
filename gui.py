@@ -2,6 +2,7 @@
 
 import wx
 from Generated import gui
+import glue
 
 #            wx.BeginBusyCursor()            
 #            wx.EndBusyCursor()
@@ -10,12 +11,17 @@ class SomFontFrame(gui.FontFrame):
     def __init__(self, *args, **kwds):
         gui.FontFrame.__init__(self, *args, **kwds)
         self.selectedOutput = 0
-        self.letterFilename = "/home/dbriscoe/code/som/data/TimesNewRoman_B.png"
-        # TODO: Set up SOM
+        self.letterFilename = "data/TimesNewRoman_B.png"
+        self._changeImage(self.letterFilename)
+        self.som = glue.SelfOrgMapGlue(5)
 
     def _selectOutput(self, i):
         self.selectedOutput = i
         self.output.SetSelection(i)
+
+    def _updateOutput(self):
+        out = self.som.getCategory( self.letterFilename )
+        self._selectOutput( out )
 
     def OnModifyOutput(self, event): # wxGlade: FontFrame.<event_handler>
         """ Override, but don't call super---it has garbage implementation
@@ -34,6 +40,8 @@ class SomFontFrame(gui.FontFrame):
         self.letterFilename = self._openFile(self.letterFilename)
 
         self._changeImage(self.letterFilename)
+
+        self._updateOutput()
 
 
     def _openFile(self, previousName):
@@ -63,14 +71,3 @@ class SomFontFrame(gui.FontFrame):
         self.Layout()
 
 
-
-
-
-if __name__ == "__main__":
-    import wx
-    app = wx.PySimpleApp(0)
-    wx.InitAllImageHandlers()
-    somFontVis = SomFontFrame(None, -1, "")
-    app.SetTopWindow(somFontVis)
-    somFontVis.Show()
-    app.MainLoop()

@@ -5,6 +5,11 @@ from PIL import Image
 class Letter():
     """ Represents a letter of some font. You can get the width, height,
         and all of the pixel data """
+    def __init__(self, filename):
+        self.filename = filename
+        self.im = Image.open( self.filename )
+    """ Represents a letter of some font. You can get the width, height,
+        and all of the pixel data """
     def __init__(self, font, letter):
         self.filename = 'data/'+ font +'_'+ letter +'.png'
         self.im = Image.open( self.filename )
