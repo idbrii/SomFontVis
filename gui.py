@@ -15,6 +15,9 @@ class SomFontFrame(gui.FontFrame):
         self._changeImage(self.letterFilename)
         self.som = glue.SelfOrgMapGlue(5)
 
+        # fix output
+        self._updateOutput()
+
     def _selectOutput(self, i):
         self.selectedOutput = i
         self.output.SetSelection(i)
@@ -45,8 +48,13 @@ class SomFontFrame(gui.FontFrame):
 
     def OnTrain(self, event): # wxGlade: FontFrame.<event_handler>
         wx.BeginBusyCursor()            
+
         self.som.train( self.nEpochs.GetValue() )
+        # fix output
+        self._updateOutput()
+
         wx.EndBusyCursor()
+
 
 
     def _openFile(self, previousName):
