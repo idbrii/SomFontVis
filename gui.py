@@ -49,13 +49,18 @@ class SomFontFrame(gui.FontFrame):
     def OnTrain(self, event): # wxGlade: FontFrame.<event_handler>
         wx.BeginBusyCursor()            
 
+        # grab newest values for alpha functions
+        alpha = float(self.tCtrl_alpha.GetValue())
+        scale = float(self.tCtrl_scale.GetValue())
+        self.som.updateAlphaGenerator(alpha, scale)
+
+        # do the training
         self.som.train( self.nEpochs.GetValue() )
-        # fix output
+
+        # recalculate output
         self._updateOutput()
 
         wx.EndBusyCursor()
-
-
 
     def _openFile(self, previousName):
         """Open an image file and return the filename"""
