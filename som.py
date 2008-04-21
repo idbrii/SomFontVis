@@ -6,11 +6,11 @@ class Weight():
         self.dim = dim
         self.data = [0] * self.dim
     def __str__(self):
-        return str(self.data)
+        return str(self.data[:8])
 
     def randomize(self):
         for w in range(len(self.data)):
-            self.data[w] = random.randint(0,10)
+            self.data[w] = random.randint(0,255)
 
     def calcDistance(self, data):
         assert len(self.data) == len(data), "Inputs should have same size as weights (%i,%i)" % (len(self.data), len(data))
@@ -40,7 +40,7 @@ class Weight():
         assert len(self.data) == len(data), "Inputs should have same size as weights (%i,%i)" % (len(self.data), len(data))
 
         # iterate over list
-        for i in range(self.data):
+        for i in range(len(self.data)):
             # Find the difference from what we wanted, scale by alpha,
             # and apply to weight
             self.data[i] += alpha*(data[i] - self.data[i])
@@ -59,6 +59,12 @@ class SelfOrgMap():
         self.weights = [Weight(nInputs) for a in range(nOutputs)]
         self._initializeWeights()
 
+    def __str__(self):
+        s = ''
+        for w in self.weights:
+            s += str(w) + "\n"
+        return s
+
     def _initializeWeights(self):
         random.seed()
         for w in self.weights:
@@ -70,17 +76,18 @@ class SelfOrgMap():
         len(output) == nOutputs == len(self.weights)
 
         >>> import imagedata
-        >>> letter = imagedata.Letter('TimesNewRoman', 'B')
+        >>> letter = imagedata.Letter.Create('TimesNewRoman', 'B')
         >>> s = SelfOrgMap( letter.getWidth()*letter.getHeight(), 5)
         >>> r = s.process( letter )
         >>> # TODO: do something with r
         """
         # convert to list
         data = list(letter.getData())
+        print "width=%i height=%i" % (letter.getWidth(),letter.getWidth())
         # create list of total distance for each weight
         return [w.calcDistance(data) for w in self.weights]
 
-    def train(self, nEpochs):
+    def train(self, letters, nEpochs):
         """
         Train the SOM for nEpochs.
         Learning rate decays with time: a(0) = 0.8, a(t) = 0.7*a(t-1)
@@ -88,7 +95,6 @@ class SelfOrgMap():
         """
 
         alpha = 0.8
-        letters = imagedata.createLetters()
         for t in range(nEpochs):
             for letter in letters:
                 self._trainOnLetter(letter, alpha)

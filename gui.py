@@ -66,9 +66,7 @@ class SomFontFrame(gui.FontFrame):
 
     def _changeImage(self, inFilename):
         """Change the current letter image"""
-        self.letterImage.Destroy()
-        self.letterImage = wx.StaticBitmap(self, -1, wx.Bitmap(inFilename, wx.BITMAP_TYPE_ANY))
-        self.Layout()
+        self.letterImage.SetBitmap(wx.Bitmap(inFilename, wx.BITMAP_TYPE_ANY))
 
 
 

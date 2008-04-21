@@ -1,14 +1,16 @@
 #! /usr/bin/env python
 
 import som
+import imagedata
 
 class SelfOrgMapGlue():
     def __init__(self, nOutputs):
-        nInputs = self._getNInputs()
+        self.letters = imagedata.createLetters()
+        nInputs = self._getNInputs(self.letters[0])
         self.som = som.SelfOrgMap(nInputs, nOutputs)
 
-    def _getNInputs(self):
-        return 500
+    def _getNInputs(self, letter):
+        return letter.getWidth()*letter.getHeight()
 
     def getCategory(self, filename):
         letter = imagedata.Letter(filename)
@@ -16,6 +18,8 @@ class SelfOrgMapGlue():
 
         return self.som._findSmallest(result)
 
+    def train(self, nEpochs):
+        self.som.train(self.letters, nEpochs)
 
 
 def _test():
