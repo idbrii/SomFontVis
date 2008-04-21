@@ -56,7 +56,7 @@ class SelfOrgMap():
         [10, 10, 10, 10, 10]
         """
         # create nOutputs weights
-        self.weights = [Weight(nInputs) for a in range(nOutputs)]
+        self.weights = [Weight(nInputs) for a in range(nOutputs+1)]
         self._initializeWeights()
 
     def __str__(self):
@@ -66,7 +66,7 @@ class SelfOrgMap():
         return s
 
     def _initializeWeights(self):
-        random.seed()
+        random.seed(1) # use constant seed for repeatable results
         for w in self.weights:
             w.randomize()
 
@@ -83,7 +83,6 @@ class SelfOrgMap():
         """
         # convert to list
         data = list(letter.getData())
-        print "width=%i height=%i" % (letter.getWidth(),letter.getWidth())
         # create list of total distance for each weight
         return [w.calcDistance(data) for w in self.weights]
 
@@ -94,19 +93,37 @@ class SelfOrgMap():
         Only modify one cluster (no neighbourhood).
         """
 
-        alpha = 0.8
+        alpha = 1.0
         for t in range(nEpochs):
-            for letter in letters:
-                self._trainOnLetter(letter, alpha)
-            alpha *= 0.7    # scale alpha
+            self._trainSingleEpoch(letters, alpha)
+            alpha = self._scaleAlpha(alpha)
             if alpha == 0.0:
                 print "Warning: Requested more epochs, but learning parameter is now zero. (t=%i)"%t
+
+    def _trainSingleEpoch(self, letters, alpha):
+        for letter in letters:
+            self._trainOnLetter(letter, alpha)
+    def _scaleAlpha(self, alpha):
+        alpha *= 0.7    # scale alpha
+        return alpha
+
+    # DEBUG: testing cheat to force good training
+    counter = -1    # initialize self.counter
+    def _getCheatSmallest(self):
+        self.counter += 1
+        self.counter %= len(self.weights)
+        return self.counter
+    # END DEBUG
 
     def _trainOnLetter(self, letter, alpha):
         """ Train for the given letter. Applys constriction with given alpha."""
         # get result
         result = self.process(letter)
         smallest = self._findSmallest(result)
+
+        # DEBUG: testing cheat to force good training
+        #smallest = self._getCheatSmallest()
+        #print 'letter %s had smallest: %i' %(letter.getName(),smallest)
 
         # modify smallest weight
         data = list(letter.getData())

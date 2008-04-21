@@ -14,6 +14,9 @@ class Letter():
         self.filename = filename
         self.im = Image.open( self.filename )
 
+    def getName(self):
+        return self.filename
+
     def getData(self):
         """ Get the data for this letter """
         return self.im.getdata()

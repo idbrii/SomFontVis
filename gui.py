@@ -43,6 +43,11 @@ class SomFontFrame(gui.FontFrame):
 
         self._updateOutput()
 
+    def OnTrain(self, event): # wxGlade: FontFrame.<event_handler>
+        wx.BeginBusyCursor()            
+        self.som.train( self.nEpochs.GetValue() )
+        wx.EndBusyCursor()
+
 
     def _openFile(self, previousName):
         """Open an image file and return the filename"""
