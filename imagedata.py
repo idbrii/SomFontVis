@@ -36,10 +36,13 @@ class Letter():
 
 def getCharList():
     return map(chr, range(ord('A'),ord('G'))) # characters [A-G) --> A..F
+def getFontList():
+    # add more fonts here
+    return 'DejaVuSans','NimbusRoman','TimesNewRoman'
 
 def createLetters():
     letters = []
-    for fFace in 'TimesNewRoman',:  # TODO: add other fonts here
+    for fFace in getFontList():
         for character in getCharList(): # the font chars
             letters.append( Letter.Create(fFace, character) )
     return letters
@@ -47,6 +50,7 @@ def createLetters():
 
 #this calls the 'main' function when this script is executed
 if __name__ == '__main__':
+    # Simple tests
     images = {}
     for a in getCharList():
         images[a] = Letter.Create('TimesNewRoman', a)
