@@ -19,9 +19,9 @@ class FontFrame(wx.Frame):
         self.button_reset = wx.Button(self, -1, "Reset")
         self.static_line_2 = wx.StaticLine(self, -1)
         self.label_alpha_init = wx.StaticText(self, -1, "a(0) = ")
-        self.tCtrl_alpha = wx.TextCtrl(self, -1, "0.8", style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB|wx.TE_RIGHT|wx.NO_BORDER)
+        self.tCtrl_alpha = wx.TextCtrl(self, -1, "0.8", style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB|wx.TE_RIGHT)
         self.label_alpha_t = wx.StaticText(self, -1, "a(t) = ")
-        self.tCtrl_scale = wx.TextCtrl(self, -1, "0.5", style=wx.TE_RIGHT|wx.NO_BORDER)
+        self.tCtrl_scale = wx.TextCtrl(self, -1, "0.5", style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB|wx.TE_RIGHT)
         self.label_alpha_tminus1 = wx.StaticText(self, -1, "*a(t-1)")
 
         self.__set_properties()
