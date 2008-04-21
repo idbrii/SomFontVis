@@ -10,7 +10,7 @@ class FontFrame(wx.Frame):
         kwds["style"] = wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
         self.letterImage = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/data/TimesNewRoman_B.png", wx.BITMAP_TYPE_ANY))
-        self.output = wx.RadioBox(self, -1, "Output: Character", choices=["A", "B", "C", "D", "E", "F"], majorDimension=0, style=wx.RA_SPECIFY_ROWS)
+        self.output = wx.RadioBox(self, -1, "Output: Cluster", choices=["1", "2", "3", "4", "5", "6"], majorDimension=0, style=wx.RA_SPECIFY_ROWS)
         self.selectImageButton = wx.Button(self, -1, "Select Image...")
         self.static_line_1 = wx.StaticLine(self, -1)
         self.nEpochs = wx.SpinCtrl(self, -1, "5", min=0, max=10000)
