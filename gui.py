@@ -62,6 +62,9 @@ class SomFontFrame(gui.FontFrame):
 
         wx.EndBusyCursor()
 
+    def OnReset(self, event): # wxGlade: FontFrame.<event_handler>
+        self.som.initializeSom()
+
     def _openFile(self, previousName):
         """Open an image file and return the filename"""
         
