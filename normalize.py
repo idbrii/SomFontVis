@@ -13,7 +13,7 @@ def usage():
     print "For example:\t", sys.argv[0], "TimesNewRoman Arial LucidaConsole"
     exit()
 
-letters_list = map( chr, range(ord('A'),ord('F')) ) # the font characters
+letters_list = map( chr, range(ord('A'),ord('G')) ) # characters [A-G) --> A..F
 # Grab fonts from command line
 try:
     if sys.argv[1] == '--help' or sys.argv[1] == '-h':
