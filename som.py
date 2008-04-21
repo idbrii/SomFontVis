@@ -9,8 +9,12 @@ class Weight():
         return str(self.data[:8])
 
     def randomize(self):
+        MAX = 255
+        i = random.randint(0,MAX)
         for w in range(len(self.data)):
-            self.data[w] = random.randint(0,255)
+            self.data[w] = i
+            i += 1
+            i %= MAX
 
     def calcDistance(self, data):
         assert len(self.data) == len(data), "Inputs should have same size as weights (%i,%i)" % (len(self.data), len(data))
@@ -53,7 +57,7 @@ class SelfOrgMap():
 
         >>> s = SelfOrgMap(10, 5)
         >>> [len(a.data) for a in s.weights]
-        [10, 10, 10, 10, 10]
+        [10, 10, 10, 10, 10, 10]
         """
         # create nOutputs weights
         self.weights = [Weight(nInputs) for a in range(nOutputs+1)]
@@ -93,7 +97,7 @@ class SelfOrgMap():
         Only modify one cluster (no neighbourhood).
         """
 
-        alpha = 1.0
+        alpha = 0.9
         for t in range(nEpochs):
             self._trainSingleEpoch(letters, alpha)
             alpha = self._scaleAlpha(alpha)
@@ -101,8 +105,14 @@ class SelfOrgMap():
                 print "Warning: Requested more epochs, but learning parameter is now zero. (t=%i)"%t
 
     def _trainSingleEpoch(self, letters, alpha):
+        self.clustersUsed = {}
+        random.shuffle(letters) #in-place shuffle -> epoch's different from last
         for letter in letters:
             self._trainOnLetter(letter, alpha)
+        print '=== Used (key,cluster):'\
+            ,[(k,self.clustersUsed[k]) for k in self.clustersUsed.keys()]\
+            ,'==='
+
     def _scaleAlpha(self, alpha):
         alpha *= 0.7    # scale alpha
         return alpha
@@ -120,6 +130,10 @@ class SelfOrgMap():
         # get result
         result = self.process(letter)
         smallest = self._findSmallest(result)
+        try:
+            self.clustersUsed[smallest] += 1
+        except:
+            self.clustersUsed[smallest] = 1
 
         # DEBUG: testing cheat to force good training
         #smallest = self._getCheatSmallest()
