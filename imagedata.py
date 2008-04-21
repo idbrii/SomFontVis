@@ -31,10 +31,13 @@ class Letter():
         self.im.save(self.filename)
 
 
+def getCharList():
+    return map(chr, range(ord('A'),ord('G'))) # characters [A-G) --> A..F
+
 def createLetters():
     letters = []
     for fFace in 'TimesNewRoman',:  # TODO: add other fonts here
-        for character in map(chr, range(ord('A'),ord('F'))): # the font chars
+        for character in getCharList(): # the font chars
             letters.append( Letter.Create(fFace, character) )
     return letters
 
@@ -42,7 +45,7 @@ def createLetters():
 #this calls the 'main' function when this script is executed
 if __name__ == '__main__':
     images = {}
-    for a in map( chr, range(ord('A'),ord('F')) ):
+    for a in getCharList():
         images[a] = Letter.Create('TimesNewRoman', a)
 
     im = images['A']
