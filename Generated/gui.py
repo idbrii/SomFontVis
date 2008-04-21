@@ -18,7 +18,7 @@ class FontFrame(wx.Frame):
         self.button_train = wx.Button(self, -1, "Train")
         self.static_line_1_copy = wx.StaticLine(self, -1)
         self.label_alpha_init = wx.StaticText(self, -1, "a(0) = ")
-        self.tCtrl_alpha = wx.TextCtrl(self, -1, "0.8", style=wx.TE_RIGHT|wx.NO_BORDER)
+        self.tCtrl_alpha = wx.TextCtrl(self, -1, "0.8", style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB|wx.TE_RIGHT|wx.NO_BORDER)
         self.label_alpha_t = wx.StaticText(self, -1, "a(t) = ")
         self.tCtrl_scale = wx.TextCtrl(self, -1, "0.5", style=wx.TE_RIGHT|wx.NO_BORDER)
         self.label_alpha_tminus1 = wx.StaticText(self, -1, "*a(t-1)")
@@ -29,8 +29,6 @@ class FontFrame(wx.Frame):
         self.Bind(wx.EVT_RADIOBOX, self.OnModifyOutput, self.output)
         self.Bind(wx.EVT_BUTTON, self.OnSelectImage, self.selectImageButton)
         self.Bind(wx.EVT_BUTTON, self.OnTrain, self.button_train)
-        self.Bind(wx.EVT_TEXT_ENTER, self.OnChangeAlpha, self.tCtrl_alpha)
-        self.Bind(wx.EVT_TEXT_ENTER, self.OnChangeAlpha, self.tCtrl_scale)
         # end wxGlade
 
     def __set_properties(self):
@@ -66,7 +64,7 @@ class FontFrame(wx.Frame):
         hsizer_3.Add(vsizer_3_2, 1, wx.EXPAND, 0)
         hsizer_3.Add(self.button_train, 0, 0, 0)
         hsizer_3.Add((20, 20), 0, 0, 0)
-        vsizer_3.Add(hsizer_3, 1, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        vsizer_3.Add(hsizer_3, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
         vsizer_3.Add(self.static_line_1_copy, 0, wx.TOP|wx.BOTTOM|wx.EXPAND, 10)
         sizer_alphainit.Add(self.label_alpha_init, 0, 0, 0)
         sizer_alphainit.Add(self.tCtrl_alpha, 0, wx.ALIGN_RIGHT, 0)
@@ -94,9 +92,6 @@ class FontFrame(wx.Frame):
         print "Event handler `OnTrain' not implemented"
         event.Skip()
 
-    def OnChangeAlpha(self, event): # wxGlade: FontFrame.<event_handler>
-        print "Event handler `OnChangeAlpha' not implemented"
-        event.Skip()
 
 # end of class FontFrame
 
