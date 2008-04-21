@@ -40,7 +40,7 @@ letters = []
 for f in font_list:
     fonts = {}
     for a in letters_list:
-        fonts[a] = Letter(f, a)
+        fonts[a] = Letter.Create(f, a)
         letters.append( fonts[a] )
 
 # Determine the maximum size image

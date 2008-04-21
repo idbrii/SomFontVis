@@ -5,13 +5,13 @@ from PIL import Image
 class Letter():
     """ Represents a letter of some font. You can get the width, height,
         and all of the pixel data """
+
+    @classmethod
+    def Create(cls, font, letter):
+        filename = 'data/'+ font +'_'+ letter +'.png'
+        return cls(filename)
     def __init__(self, filename):
         self.filename = filename
-        self.im = Image.open( self.filename )
-    """ Represents a letter of some font. You can get the width, height,
-        and all of the pixel data """
-    def __init__(self, font, letter):
-        self.filename = 'data/'+ font +'_'+ letter +'.png'
         self.im = Image.open( self.filename )
 
     def getData(self):
@@ -31,11 +31,19 @@ class Letter():
         self.im.save(self.filename)
 
 
+def createLetters():
+    letters = []
+    for fFace in 'TimesNewRoman',:  # TODO: add other fonts here
+        for character in map(chr, range(ord('A'),ord('F'))): # the font chars
+            letters.append( Letter.Create(fFace, character) )
+    return letters
+
+
 #this calls the 'main' function when this script is executed
 if __name__ == '__main__':
     images = {}
     for a in map( chr, range(ord('A'),ord('F')) ):
-        images[a] = Letter('TimesNewRoman', a)
+        images[a] = Letter.Create('TimesNewRoman', a)
 
     im = images['A']
     width = im.getWidth()
