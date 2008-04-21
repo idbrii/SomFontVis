@@ -9,15 +9,19 @@ class FontFrame(wx.Frame):
         # begin wxGlade: FontFrame.__init__
         kwds["style"] = wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
-        self.letterImage = wx.StaticBitmap(self, -1, wx.Bitmap("data/TimesNewRoman_B.png", wx.BITMAP_TYPE_ANY))
+        self.letterImage = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/data/TimesNewRoman_B.png", wx.BITMAP_TYPE_ANY))
         self.output = wx.RadioBox(self, -1, "Output: Character", choices=["A", "B", "C", "D", "E", "F"], majorDimension=0, style=wx.RA_SPECIFY_ROWS)
-        self.selectImageButton = wx.Button(self, -1, "newImageButton")
+        self.selectImageButton = wx.Button(self, -1, "Select Image...")
+        self.static_line_1 = wx.StaticLine(self, -1)
+        self.nEpochs = wx.SpinCtrl(self, -1, "5", min=0, max=10000)
+        self.button_train = wx.Button(self, -1, "Train")
 
         self.__set_properties()
         self.__do_layout()
 
         self.Bind(wx.EVT_RADIOBOX, self.OnModifyOutput, self.output)
         self.Bind(wx.EVT_BUTTON, self.OnSelectImage, self.selectImageButton)
+        self.Bind(wx.EVT_BUTTON, self.OnTrain, self.button_train)
         # end wxGlade
 
     def __set_properties(self):
@@ -28,18 +32,33 @@ class FontFrame(wx.Frame):
 
     def __do_layout(self):
         # begin wxGlade: FontFrame.__do_layout
-        sizer_1 = wx.BoxSizer(wx.VERTICAL)
-        sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_5 = wx.BoxSizer(wx.VERTICAL)
-        sizer_5.Add((100, 20), 0, 0, 0)
-        sizer_5.Add(self.letterImage, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-        sizer_2.Add(sizer_5, 1, wx.EXPAND, 0)
-        sizer_2.Add(self.output, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
-        sizer_2.Add((20, 20), 0, 0, 0)
-        sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
-        sizer_1.Add(self.selectImageButton, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
-        self.SetSizer(sizer_1)
-        sizer_1.Fit(self)
+        vsizer_root = wx.BoxSizer(wx.VERTICAL)
+        vsizer_3 = wx.BoxSizer(wx.VERTICAL)
+        hsizer_3 = wx.BoxSizer(wx.HORIZONTAL)
+        vsizer_3_2 = wx.BoxSizer(wx.VERTICAL)
+        hsizer_2 = wx.BoxSizer(wx.HORIZONTAL)
+        vsizer_2_1 = wx.BoxSizer(wx.VERTICAL)
+        vsizer_2_1.Add((100, 20), 0, wx.EXPAND, 0)
+        vsizer_2_1.Add(self.letterImage, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        hsizer_2.Add(vsizer_2_1, 1, wx.EXPAND, 0)
+        hsizer_2.Add(self.output, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
+        hsizer_2.Add((20, 20), 0, 0, 0)
+        vsizer_root.Add(hsizer_2, 1, wx.EXPAND, 0)
+        vsizer_root.Add(self.selectImageButton, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        vsizer_3.Add((20, 20), 0, 0, 0)
+        vsizer_3.Add(self.static_line_1, 0, wx.EXPAND, 0)
+        vsizer_3.Add((20, 20), 0, 0, 0)
+        hsizer_3.Add((20, 20), 0, 0, 0)
+        label_epochs = wx.StaticText(self, -1, "Number of epochs")
+        vsizer_3_2.Add(label_epochs, 0, 0, 0)
+        vsizer_3_2.Add(self.nEpochs, 0, 0, 0)
+        hsizer_3.Add(vsizer_3_2, 1, wx.EXPAND, 0)
+        hsizer_3.Add(self.button_train, 0, 0, 0)
+        hsizer_3.Add((20, 20), 0, 0, 0)
+        vsizer_3.Add(hsizer_3, 1, wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        vsizer_root.Add(vsizer_3, 1, wx.EXPAND, 0)
+        self.SetSizer(vsizer_root)
+        vsizer_root.Fit(self)
         self.Layout()
         # end wxGlade
 
@@ -49,6 +68,10 @@ class FontFrame(wx.Frame):
 
     def OnSelectImage(self, event): # wxGlade: FontFrame.<event_handler>
         print "Event handler `OnSelectImage' not implemented!"
+        event.Skip()
+
+    def OnTrain(self, event): # wxGlade: FontFrame.<event_handler>
+        print "Event handler `OnTrain' not implemented"
         event.Skip()
 
 # end of class FontFrame
