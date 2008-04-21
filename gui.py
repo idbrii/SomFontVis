@@ -13,7 +13,7 @@ class SomFontFrame(gui.FontFrame):
         self.selectedOutput = 0
         self.letterFilename = "data/TimesNewRoman_B.png"
         self._changeImage(self.letterFilename)
-        self.som = glue.SelfOrgMapGlue(5)
+        self.som = glue.SelfOrgMapGlue(5, 1.0, 0.5)
 
         # fix output
         self._updateOutput()

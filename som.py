@@ -1,6 +1,22 @@
 #! /usr/bin/env python
 import random
 
+def ScaledGen(alpha, scale):
+    """
+    An example generator for alpha.
+
+    >>> sGen = ScaledGen(1.0, 0.5)
+    >>> sGen.next()
+    1.0
+    >>> sGen.next()
+    0.5
+    >>> sGen.next()
+    0.25
+    """
+    while True:
+        yield alpha
+        alpha *= scale
+
 class Weight():
     def __init__(self, dim):
         self.dim = dim
@@ -50,18 +66,19 @@ class Weight():
             self.data[i] += alpha*(data[i] - self.data[i])
 
 class SelfOrgMap():
-    def __init__(self, nInputs, nOutputs):
+    def __init__(self, nInputs, nOutputs, alphaGen=ScaledGen(1.0,0.5)):
         """
         nInputs -> number of inputs to the map
         nOutputs -> number of categories/clusters
 
-        >>> s = SelfOrgMap(10, 5)
+        >>> s = SelfOrgMap(10, 5, ScaledGen(0.5,0.5))
         >>> [len(a.data) for a in s.weights]
         [10, 10, 10, 10, 10, 10]
         """
         # create nOutputs weights
         self.weights = [Weight(nInputs) for a in range(nOutputs+1)]
         self._initializeWeights()
+        self.setAlphaGenerator(alphaGen)
 
     def __str__(self):
         s = ''
@@ -74,6 +91,9 @@ class SelfOrgMap():
         for w in self.weights:
             w.randomize()
 
+    def setAlphaGenerator(self, alphaGen):
+        self.alphaGen = alphaGen
+
     def process(self, letter):
         """ self.process( Letter ) -> list
         Using the input letter, determine the outputs of the SOM.
@@ -81,7 +101,7 @@ class SelfOrgMap():
 
         >>> import imagedata
         >>> letter = imagedata.Letter.Create('TimesNewRoman', 'B')
-        >>> s = SelfOrgMap( letter.getWidth()*letter.getHeight(), 5)
+        >>> s = SelfOrgMap( letter.getWidth()*letter.getHeight(), 5, ScaledGen(0.5,0.5))
         >>> r = s.process( letter )
         >>> # TODO: do something with r
         """
@@ -96,15 +116,13 @@ class SelfOrgMap():
         Learning rate decays with time: a(0) = 0.8, a(t) = 0.7*a(t-1)
         Only modify one cluster (no neighbourhood).
         """
-
-        alpha = 0.9
         for t in range(nEpochs):
-            self._trainSingleEpoch(letters, alpha)
-            alpha = self._scaleAlpha(alpha)
-            if alpha == 0.0:
-                print "Warning: Requested more epochs, but learning parameter is now zero. (t=%i)"%t
+            self._trainSingleEpoch(letters, self.alphaGen.next())
 
     def _trainSingleEpoch(self, letters, alpha):
+        if alpha == 0.0:
+            print "Warning: Requested more epochs, but learning parameter is now zero. (t=%i)"%t
+
         self.clustersUsed = {}
         random.shuffle(letters) #in-place shuffle -> epoch's different from last
         for letter in letters:
@@ -126,7 +144,11 @@ class SelfOrgMap():
     # END DEBUG
 
     def _trainOnLetter(self, letter, alpha):
-        """ Train for the given letter. Applys constriction with given alpha."""
+        """
+        Train for the given letter.
+        Determine the closest weight to the input `letter` and make that weight
+        closer to the input using the given `alpha`.
+        """
         # get result
         result = self.process(letter)
         smallest = self._findSmallest(result)
@@ -147,7 +169,7 @@ class SelfOrgMap():
         """ self._findSmallest( list ) -> int
         Finds the smallest element in `result` and returns its index
 
-        >>> s = SelfOrgMap(0,0)
+        >>> s = SelfOrgMap(0,0, ScaledGen(0.5,0.5))
         >>> s._findSmallest([6, 3, 9, 2])
         3
         """
