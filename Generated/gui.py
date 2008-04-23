@@ -9,6 +9,7 @@ class FontFrame(wx.Frame):
         # begin wxGlade: FontFrame.__init__
         kwds["style"] = wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwds)
+        self.sizer_2_staticbox = wx.StaticBox(self, -1, "Output Visualizer")
         self.alpha_vsizer_1_staticbox = wx.StaticBox(self, -1, "Alpha")
         self.letterImage = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/data/TimesNewRoman_B.png", wx.BITMAP_TYPE_ANY))
         self.output = wx.RadioBox(self, -1, "Output: Cluster", choices=["1", "2", "3", "4", "5", "6"], majorDimension=0, style=wx.RA_SPECIFY_ROWS)
@@ -23,6 +24,13 @@ class FontFrame(wx.Frame):
         self.label_alpha_t = wx.StaticText(self, -1, "a(t) = ")
         self.tCtrl_scale = wx.TextCtrl(self, -1, "0.5", style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB|wx.TE_RIGHT)
         self.label_alpha_tminus1 = wx.StaticText(self, -1, "*a(t-1)")
+        self.static_line_1_copy = wx.StaticLine(self, -1)
+        self.weightImage_0 = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/weight/0.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_1 = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/weight/0.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_2 = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/weight/0.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_3 = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/weight/0.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_4 = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/weight/0.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_5 = wx.StaticBitmap(self, -1, wx.Bitmap("/home/dbriscoe/code/som/weight/0.png", wx.BITMAP_TYPE_ANY))
 
         self.__set_properties()
         self.__do_layout()
@@ -49,6 +57,8 @@ class FontFrame(wx.Frame):
     def __do_layout(self):
         # begin wxGlade: FontFrame.__do_layout
         vsizer_root = wx.BoxSizer(wx.VERTICAL)
+        sizer_2 = wx.StaticBoxSizer(self.sizer_2_staticbox, wx.HORIZONTAL)
+        grid_sizer_1 = wx.GridSizer(3, 3, 1, 1)
         vsizer_3 = wx.BoxSizer(wx.VERTICAL)
         alpha_vsizer_1 = wx.StaticBoxSizer(self.alpha_vsizer_1_staticbox, wx.VERTICAL)
         sizer_alphafunc = wx.BoxSizer(wx.HORIZONTAL)
@@ -86,6 +96,15 @@ class FontFrame(wx.Frame):
         alpha_vsizer_1.Add(sizer_alphafunc, 1, wx.EXPAND, 0)
         vsizer_3.Add(alpha_vsizer_1, 1, wx.LEFT|wx.RIGHT|wx.BOTTOM|wx.EXPAND, 10)
         vsizer_root.Add(vsizer_3, 1, wx.EXPAND, 0)
+        vsizer_root.Add(self.static_line_1_copy, 0, wx.TOP|wx.BOTTOM|wx.EXPAND, 10)
+        grid_sizer_1.Add(self.weightImage_0, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        grid_sizer_1.Add(self.weightImage_1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        grid_sizer_1.Add(self.weightImage_2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        grid_sizer_1.Add(self.weightImage_3, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        grid_sizer_1.Add(self.weightImage_4, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        grid_sizer_1.Add(self.weightImage_5, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 0)
+        sizer_2.Add(grid_sizer_1, 1, wx.EXPAND, 0)
+        vsizer_root.Add(sizer_2, 1, wx.EXPAND, 0)
         self.SetSizer(vsizer_root)
         vsizer_root.Fit(self)
         self.Layout()
