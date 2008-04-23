@@ -3,14 +3,17 @@ FLAGS = -tt
 MAIN = main.py
 SRCS= $(wildcard *.py)
 
-.PHONY:	all run doctest clean
+.PHONY:	all init run doctest clean
 
 all:	tags run
 
 tags:	$(SRCS)
 	-ctags -R .
 
-run:	make.lib.stamp make.Generated.stamp
+init:
+	mkdir weight
+
+run:	init make.lib.stamp make.Generated.stamp
 	$(CC) $(FLAGS) $(MAIN)
 
 # run doctest for every py file except main
@@ -26,5 +29,6 @@ clean:
 	-rm *.pyc
 	-rm tags
 	-rm make.*.stamp
+	-rm -rf weight/
 	make -C lib clean
 	make -C Generated clean
