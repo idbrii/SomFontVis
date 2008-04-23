@@ -21,6 +21,10 @@ class Letter():
         """ Get the data for this letter """
         return self.im.getdata()
 
+    def getSize(self):
+        """ Get the width of the data for this letter """
+        return self.im.size
+
     def getWidth(self):
         """ Get the width of the data for this letter """
         return self.im.size[0]

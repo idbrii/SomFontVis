@@ -126,10 +126,7 @@ class SelfOrgMap():
         for t in range(nEpochs):
             self._trainSingleEpoch(letters, self.alphaGen.next())
 
-        self._writeWeights(letters)
-
-    def _writeWeights(self, letters):
-        letter = letters[0]
+    def writeWeights(self, letter):
         i = 0
         for w in self.weights:
             letter.saveWeight(i, w.data)

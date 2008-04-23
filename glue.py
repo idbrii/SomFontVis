@@ -11,6 +11,7 @@ class SelfOrgMapGlue():
 
         self.letters = imagedata.createLetters()
         self.initializeSom()
+        self.updateWeightImages()
 
     def _getNInputs(self, letter):
         return letter.getWidth()*letter.getHeight()
@@ -30,6 +31,13 @@ class SelfOrgMapGlue():
     def initializeSom(self):
         nInputs = self._getNInputs(self.letters[0])
         self.som = som.SelfOrgMap(nInputs, self.nOutputs)
+
+    def updateWeightImages(self):
+        # update weight images
+        letter = self.letters[0]
+        self.som.writeWeights(letter)
+
+
 
 
 def _test():
