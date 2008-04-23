@@ -1,0 +1,15 @@
+*.swp
+*.pyc
+*.class
+*.o
+*.tmp
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.pdf
+*~
+*.bbl
+*.blg

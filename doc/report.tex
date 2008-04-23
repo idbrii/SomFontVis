@@ -1,0 +1,684 @@
+\documentclass[12pt,letterpaper,oneside]{report}
+\usepackage{fullpage,setspace,url,amsmath}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage[parfill]{parskip}    
+\usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
+
+%%% Commands
+\newcommand \groupname{Team Fuzzy Wuzzy}
+
+\newcommand \java[1]{\texttt{#1}}
+\newcommand \TODO[1]{\textbf{#1}}
+\newcommand \qq[1]{``{#1}''}
+\newcommand \etal{\textit{et al.}}
+
+\renewcommand{\thesection}{\arabic{section}}
+
+
+%%% Style
+\bibliographystyle{ieeetr}
+\usepackage[colorlinks=true, urlcolor=black, linkcolor=black, citecolor=black]{hyperref}
+
+
+%%% Metadata
+\title{The Design and Implementation of\\an Autonomous Car Platoon}
+
+%\subtitle{\groupname}
+\author{ David Briscoe \and Callum Hay \and Jingyuan Huang \and Fred Tung }
+
+
+%%% Document
+\begin{document}
+
+% Front matter
+\pagenumbering{roman}
+\setcounter{page}{1}
+%\setstretch{2}
+\maketitle
+\tableofcontents
+\newpage
+
+% Main matter
+\setcounter{section}{0}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+
+\section{Introduction}
+% Explain some problem statements stuff here.
+The purpose of this project was to
+design and implement a Java applet demonstrating the use of a fuzzy logic
+inferencing engine to control the acceleration and deceleration of simulated
+cars. Furthermore, we needed to do it in a manner such that collisions are
+avoided and the distance between adjacent cars is suitably maintained.
+
+Producing such a system required us to develop fuzzy membership functions,
+choose fuzzifier and defuzzifier functions, and determine our fuzzy inference
+method. Additionally, we created a Java GUI that displays our platoon of three
+cars (in their relative positions), dynamic graphing of the car's attributes
+and the membership functions, and a control panel for manipulating the inputs.
+
+This document will first describe the objectives demanded by the project, it
+will then detail the implementation and design for all elements of the
+fuzzy application (inferencing engine, membership functions and GUI). The
+document will then analyze the results output by the application and describe
+possible extensibility as well as conclusions and recommendations.
+As a final section, the document offers instructions on how to get the
+application started and running.
+
+\clearpage
+\section{Background}
+We've researched similar projects to see how other groups have approached these
+problems. Autonomous driving is a complicated problem. Hatipkarasulu \etal~have
+applied fuzzy principles to the car-following problem to better simulate human
+responsiveness \cite{Hatipkarasulu}. They found that they could successfully
+model human-like reactions using fuzzy systems and believed their results were
+indicative of real world results. However, their solution was more focused on
+general driving situations, as opposed to our more specific constraint of three
+cars driving in a column.
+
+Ranjitkar \etal~investigated the effectiveness of various mathematical models
+to control multiple cars driving in a column. Their research showed that some
+simple mathematical models perform very well, while other more sophisticated
+mathematical models can be tuned to also provide good performance
+\cite{Ranjitkar}. However, this situation also appears to be a good application
+of a fuzzy inference engine. Fuzzy logic is a different approach to dealing
+with uncertainty than typical mathematical models.  
+
+Protzel \etal~apply a fuzzy inference engine to our problem of an autonomous
+column of cars. They demonstrate how fuzzy logic can model many different
+situations. Its flexibility allowed them to model \qq{different driver types,
+desired velocities, and weather conditions \cite{protzel-fuzzy}.}
+
+Protzel \etal's approach is similar to how we did our implementation. We made
+extensive use of their results to tune our fuzzy system.
+
+\clearpage
+\section{Objectives}
+% State objectives of the project in excruciating detail, yay!
+% Opportunities for citing references in absurd and wonderful ways?
+%\cite{Ranjitkar}
+
+In order to satisfy the requirements of the project we had to accomplish
+several key objectives:
+\begin{enumerate}
+
+\item Develop fuzzy membership functions for acceleration, velocity and
+distances between cars --- that is, create them graphically for reference and
+then implement them in code.
+
+\item Establish \textit{fuzzifier} and \textit{defuzzifier} functions
+for the fuzzification and defuzzification of inputs and outputs,
+respectively. Implement these processes in code.
+
+\item Develop fuzzy inference rules regarding the designed fuzzy
+membership functions and implement the rules in code.
+
+\item Develop a Java GUI widget for displaying a platoon of simulated cars,
+including graphics for the cars and indicators for their relative positions
+and distances from each other and other relevant information.
+
+\item Develop a Java GUI widget for displaying graphs for the car velocities
+and accelerations as well as the membership functions. The graphs must be
+able to update dynamically and show the continuous flow of data over time
+for each car.
+
+\item Develop a GUI element for allowing the user to input values for
+initial and desired car velocities and distances.
+
+\item Ensure the application is user-friendly and accessible as a Java applet.
+
+\end{enumerate}
+
+\clearpage
+\section{Design and Implementation}
+\subsection{Membership Functions}
+% Describe membership functions and how they were implemented in code
+Instead of simply using the Triangular functions as membership functions, we
+wanted to experiment with other types of membership functions, such as the
+Gaussian membership function, as was learned in class. This led to one
+of our major design decisions: discretizing the membership functions and
+storing their values in arrays. 
+
+The discretization approach had several advantages. First, it allows us to
+pre-compute the membership functions for quick lookup when needed. When the
+inference engine requires the value of a membership function at a particular
+domain value $x$, instead of calculating $ \mu(x) $ on the fly, we can simply
+index into the array of pre-computed values. 
+
+Second, it simplifies the implementation of several operations required for
+fuzzy inference. To qualify a consequent membership function, we return an
+array of values derived from taking the minimums of the firing strength and
+each of the pre-computed values:
+
+\footnotesize
+\begin{verbatim}
+  public double[] getQualifiedValues(double firingStrength) {
+    double[] qualifiedValues = new double[sampledValues.length];
+    for (int i = 0; i < qualifiedValues.length; i++) {
+      qualifiedValues[i] = Math.min(firingStrength, sampledValues[i]);
+    }
+    return qualifiedValues;
+  }
+\end{verbatim}
+\normalsize
+
+To compute the union of two membership functions, we look up the value of the
+membership functions at $x$ and take the maximum, for all $x$ over which at
+least one membership function is defined (non-zero). The actual code is
+somewhat complicated because of the need to account for differing domains, so
+for brevity it is not included here.
+
+The discretization allows us to compute a sum instead of performing an
+integration in order to calculate the centroid during defuzzification.
+
+\footnotesize
+\begin{verbatim}
+  private double centroid(double f[], double lower) {
+    double t = 0;
+    double x;
+    for (int i = 0; i < f.length; ++i) {
+      x = lower + i * MembershipFunction.RESOLUTION;
+      t += x * f[i];
+    }
+    return t / sum(f);
+  }
+\end{verbatim}
+\normalsize
+
+The third advantage that discretization brings is that it allows us to support complex
+membership functions like Gaussian or Generalized Bell, which was the initial
+drive for our choice of the approach. This point is related to the second advantage,
+as described above. While it is relatively straightforward to calculate a union
+or centroid when the membership functions are all linear (e.g. Triangular or
+Trapezoidal), it is much more difficult when the functions are non-linear,
+especially if they are also not differentiable (e.g. Gaussian). For example,
+the centroid can be calculated using the following formula (from lecture
+slides):
+
+$$Z_{COA} = \int_z \mu(z)zdz / \int_z \mu(z)dz$$
+
+For linear membership functions, the integrals are straightforward to solve
+analytically. However, if the membership function is Gaussian, it is not
+possible to analytically solve the integrals. Obtaining an approximate solution
+would require either a numeric method or a transformation to the standard
+Gaussian ($\mu = 0, \sigma = 1$) and a table lookup.
+
+A disadvantage of our approach is that it is limited by the resolution we
+define. For example, if the resolution is 0.1, then querying the membership
+function at $x$ = 5.01 can give the same result as querying at $x$ = 5.09. This
+is not too significant a problem as long as the system can support a resolution
+low enough for the user's requirements.
+
+In our implementation, we have an abstract \texttt{MembershipFunction} class,
+which defines variables and methods common to all membership functions: for
+example, a method to look up the membership value at a specified domain value,
+a method to qualify the values given a firing strength, and the resolution
+constant.  Concrete implementations of this abstract class include a Gaussian
+membership function, its step variants (Gaussian distributed on one side of the
+mean, 1.0 on the other), a symmetric Triangular membership function, and its
+step variants. The step variants are applicable to the boundary membership
+functions (\textsc{V\_VERYSLOW}, \textsc{D\_VERYFAR}, etc.) The structure is
+quite simple and can be easily extended to other distributions, such as
+Trapezoidal or Generalized Bell. To illustrate, the Gaussian membership
+function implementation is shown below:
+
+\footnotesize
+\begin{verbatim}
+public class GaussianMembershipFunction extends MembershipFunction {
+  private static final int NUM_STD_DEVS = 3;  // # of std. deviations to sample
+	
+  public GaussianMembershipFunction(double mean, double sigma) {
+    lowerBound = mean - sigma * NUM_STD_DEVS;
+    sampledValues = new double[(int)(sigma * NUM_STD_DEVS * 2 / RESOLUTION) 
+        + 1];
+    for (int i = 0; i < sampledValues.length; i++) {
+      double x = lowerBound + i * RESOLUTION;
+      sampledValues[i] = Math.exp(-0.5 * Math.pow((x - mean) / sigma, 2));
+    }
+  }
+}
+\end{verbatim}
+\normalsize
+
+We experimented with fuzzy inference using Triangular and Gaussian membership
+functions. Initially, and at our demo, we modeled the fuzzy sets using Gaussian
+membership functions. The rationale was that natural phenomena are, in general,
+more accurately modeled using Gaussian distributions than Triangular
+distributions. In our final implementation, however, we moved to Triangular
+membership functions since many experimental fuzzy-based car platoon systems
+successfully follow this approach, such as the one developed by Protzel \etal
+\cite{protzel-fuzzy}. Furthermore, we discovered that it affords our system better
+performance as well. We further tuned our membership functions based on the
+results of Protzel \etal, as can be seen in the following graphs of the final
+membership functions:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in]{diagrams/membership-fns}
+\caption{Membership Functions} \label{fig:membership-fns}
+\end{figure}
+
+One major difference between our membership functions and those used by Protzel
+\etal~is their inclusion of two additional acceleration functions.  These
+functions correspond to maximal acceleration and maximal braking (presumably,
+the highest acceleration or braking that is physically feasible).  Since our
+system uses five acceleration fuzzy sets instead of seven, our rule base
+obviously cannot map directly to Protzel \etal's. However, as described in the
+following section, we were still able to tweak a few of our rules based on some
+good ideas in Protzel \etal's rule base for a type L (\qq{defensive}) driver. 
+
+\subsection{Inference Engine}
+% Describe the inference engine
+The inference engine consists of the following components:
+\begin{itemize}
+\item InferenceRule
+\item FuzzySet
+\item FuzzySetsManager
+\item Fuzzifier
+\item Defuzzifier
+\item FuzzySystem
+\end{itemize}
+
+Figure \ref{fig:inf-class} shows the class diagram of all the components. The
+details of each component are discussed in the subsequent sections.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=5in]{diagrams/fuzzy-system} 
+  \caption{Class diagram of all the components in inference engine}
+  \label{fig:inf-class}
+\end{figure}
+
+
+\subsubsection{Inference Rules} 
+We came up with an initial set of rules (Table
+\ref{tbl:init-rules}) just to make our system work. However, we noticed that in
+some cases the cars either accelerated or decelerated too much. The cars also 
+collided in several scenarios involving boundary distance and velocity values.
+This led us to make
+some adjustments to the rule base. In particular, we referenced the rules used
+by \cite{protzel-fuzzy} for the defensive cars. Those rules are constructed so that
+the cars will accelerate less and tend to brake more. 
+For example, in our revised rules, we never suggest accelerating if the car's
+velocity is already fast or very fast, regardless of the separating distance.
+If the car is travelling very fast, the rules suggest braking regardless
+of distance. Acceleration is more moderate: The car will accelerate hard only 
+if it is very slow and very far away. In general, as can be seen in the 
+following tables, the rules are adjusted to be more conservative.
+
+Here are the notations used in the tables:
+\begin{itemize}
+\item AH - Accelerate Hard
+\item A - Accelerate 
+\item BH - Brake Hard
+\item B - Brake
+\item None - No Action
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Initial Inference Rules of the Engine} \label{tbl:init-rules}
+\begin{tabular}{|c||c|c|c|c|c|}
+\hline
+            & Very Slow & Slow  & Just Right  & Fast  & Very Fast \\ \hline \hline
+Very Far    & AH        & AH    & A           & A     & None      \\ \hline
+Far         & AH        & A     & A           & None  & B         \\ \hline
+Just Right  & A         & A     & None        & B     & B         \\ \hline
+Close       & A         & None  & B           & B     & BH        \\ \hline
+Very Close  & None      & B     & B           & BH    & BH        \\ \hline
+\hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[h]
+\centering
+\caption{Modified Inference Rules of the Engine} \label{tbl:updated-rules}
+\begin{tabular}{|c||c|c|c|c|c|}
+\hline
+            & Very Slow & Slow  & Just Right  & Fast  & Very Fast \\ \hline \hline
+Very Far    & AH        & A     & A           & None  & B         \\ \hline
+Far         & A         & A     & A           & B     & B         \\ \hline
+Just Right  & A         & A     & None        & B     & B         \\ \hline
+Close       & None      & None  & B           & BH    & BH        \\ \hline
+Very Close  & None      & B     & B           & BH    & BH        \\ \hline
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Fuzzy Set}
+Fuzzy Set is a simple component containing all the possible values for the
+fuzzy variables. It is used by the Fuzzy Sets Manager to map the membership
+functions. All the possible values in Fuzzy Set are shown in Table~\ref{tbl:fuzzyset}.
+
+\begin{table}[h]
+\centering
+\caption{Fuzzy Set} \label{tbl:fuzzyset}
+\begin{tabular}{|c|c|}
+\hline
+ & Fuzzy Set Values \\ \hline
+\textbf{Distance} & \textsc{d\_veryclose}, \textsc{d\_close}, \textsc{d\_justright}, \textsc{d\_far}, \textsc{d\_veryfar} \\ 
+\hline
+\textbf{Velocity} & \textsc{v\_veryslow}, \textsc{v\_slow}, \textsc{v\_justright}, \textsc{v\_fast}, \textsc{v\_veryfast} \\
+\hline
+\textbf{Acceleration} & \textsc{a\_brakehard}, \textsc{a\_brake}, \textsc{a\_none}, \textsc{a\_accelerate}, \textsc{a\_acceleratehard} \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\subsubsection{Fuzzy Sets Manager}
+The fuzzy set manager maintains a map between fuzzy set values and membership
+functions. Figure \ref{fig:java-fsmgr} shows the functions defined in the
+manager. The managers fulfils two major purposes: calculating the degree
+of validity given a fuzzy input (\texttt{getDegreeOfValidity}), and computing
+the qualified consequent given a firing strength
+(\texttt{getQualifiedConsequent}). 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=5in]{diagrams/FuzzySetsManager} 
+  \caption{Javadoc for FuzzySetsManager Class} \label{fig:java-fsmgr}
+\end{figure}
+
+The fuzzy set manager encapsulates the inference rules and membership
+functions, providing a clean interface for the fuzzy system. 
+
+\subsubsection{Fuzzifier}
+The fuzzifier is the component to fuzzify the crisp input given to the fuzzy system.
+The fuzzifier in our current system returns a fuzzy singleton.
+
+\subsubsection{Defuzzifier}
+The defuzzifier accepts the final qualified consequent from the fuzzy system,
+and computes the centroid as the crisp optimal acceleration for a particular car. 
+To reduce jitter, the defuzzifier returns an acceleration of zero if the 
+absolute value of the computed acceleration is less than a small constant 
+$ \epsilon $. We
+choose to compute the centroid because it takes into account a range of values, as
+opposed to mean of maximum or smallest of maximum methods. The centoid method is commonly
+used in practice because it gives good performance in general, and it is also
+the method adopted by Protzel \etal~(referred to as the \qq{center of gravity} 
+in their paper) \cite{protzel-fuzzy}.
+
+\subsubsection{Fuzzy System}
+Each car has an independent Fuzzy System. The Fuzzy System only provides one
+public function to the car to get its optimal acceleration (Figure
+\ref{fig:java-fs}).  The rest of the functionality is hidden from the car. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=4in]{diagrams/FuzzySystem} 
+  \caption{Javadoc for FuzzySystem Class} \label{fig:java-fs}
+\end{figure}
+
+Upon receiving the velocity and the distance from the car, the fuzzy system
+converts these crisp values to fuzzy values using the fuzzifier. It then
+queries the Fuzzy Sets Manager for the degree of validity of each fuzzy set
+given those input values.
+
+After the Fuzzy System collects all the degrees of validity, it iterates
+through the combinations of these values and the inference rules,  and use each
+combination to get qualified consequents from the Fuzzy Sets Manager. It then
+computes the union of all the consequents. Finally, it passes the union of
+qualified consequents to the defuzzifier and gets a crisp value from  it as the
+optimal acceleration for the car. The car gets this value as the return of
+function \texttt{ComputeAcceleration} and adjusts its physical states (velocity
+and position) based this acceleration.
+
+\clearpage
+\subsection{Graphical User Interface}
+% Describe the GUI (pretty picture also?)
+
+The Graphical User Interface (GUI) was created using a combination of
+Java AWT and Swing widgets. The GUI consists of four main panels: the
+car simulation panel, the graph panel, the control/input panel, and
+the membership function display panel. See Figure~\ref{fig:guidiagram} for a
+full picture and taxonomy of the GUI.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=6.5in]{diagrams/gui-overview}
+\caption{Overview of the application GUI. The numbered labels correpsond
+as follows, 1: Car simulation panel, 2: Graph panel, 3: Control/input panel, 
+4: Membership function display panel} \label{fig:guidiagram}
+\end{figure}
+
+All of the panels are owned by our \java{RootPanel}. This component also
+provides a system `clock.' Every 250 milliseconds (as specified by
+\java{framerate}), the `clock' ticks and \java{RootPanel} calls \java{tick()} on
+each of its components.
+
+The car simulation (called the \java{Core}) displays three car avatars moving
+along a black road. The front car (the blue one) maintains its position and the
+other two cars move relative to the lead car. Each car is an instance of our
+\java{Car} class. \java{Car} provides the physics calculations and drawing
+routines for the cars. On every tick of the program's `clock,' the cars will
+update themselves for the duration of a timeslice.  Currently, our timeslice
+\java{Core.dt} is set to 0.25 seconds. This update routine involves requesting
+an acceleration from the fuzzy inference engine and applying that acceleration
+for the amount of time in the timeslice.
+
+The graph panel contains dynamic graphs for the velocity and acceleration
+of the cars. As each time tick occurs, each graph is populated with a value
+for the velocity or acceleration, respectively. These values come in as 
+data points on each tick of the program's `clock.' The points arrive on 
+the right hand side of the graph and move towards the left until they exit.
+The $y$-values of the currently left-most points are continuously updated and
+can be read off the $y$-axis of either graph. Furthermore, the left-most and
+right-most $x$-values (time tick values) can be read at anytime. Each car has
+its own colour-coded line on the graph (red, green, and blue), representing
+the corresponding, similarly-coloured cars. 
+
+The control and input panel provides the user with widgets for entering the
+initial and desired velocities and inter-car distances. These values are
+entered via textbox widgets, which validate entered data. Valid values
+for the initial and desired velocities range from 1 to 20 meters/second 
+and valid values for the initial and desired inter-car distances range 
+from 1 to 20 meters. The panel also has two buttons: a ``Go to Initial''
+button and a ``Start''/``Pause''/``Unpause'' button. The ``Go to Initial''
+button sets the cars at the user-specified initial velocities and distances.
+The ``Start'' button will start the application, ``Pause'' will pause the
+time tick and thus halt all action in the application, and the ``Unpause''
+button will resume the application after it was paused.
+
+The membership function display panel is hidden by default but can 
+be accessed via the tabbed control on the bottom portion of the GUI, named
+``Fuzzy Membership Functions''. This panel has no effect on the application
+and serves the purpose of displaying the fuzzy membership functions for the
+distance, velocity and accelerations of the cars in the simulation. Furthermore,
+the panel updates the membership function graphs whenever new values 
+are entered for the desired velocity or distance in the control/input panel. 
+
+\clearpage
+\section{Analysis}
+% Analyze the results of our project... do cars crash? when? what are best
+% inputs, why? ...
+
+\subsection{System before tuning}
+Originally we decided to use Gaussian membership functions, hoping that the
+smoothness in the membership functions can reduce the oscillation behaviour we
+observed in a naive crisp implementation. Also our original inference rules are
+solely based on intuitive driving behaviours. 
+
+We observe that in certain cases the cars still have oscillatory behaviours.
+When the desired velocity is high and the desired distance is short, the cars
+can crash into each other. 
+
+Table \ref{tbl:cases-before} shows several test cases. The cars worked well
+when the differences between the initial and the desired velocity and distance
+are not big. However, the system became very unstable when we chose desired
+values that were drastically different from the initial values.
+
+\begin{table}[ht]
+\centering
+\caption{Test Cases for System Before Tuning} \label{tbl:cases-before}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Case Number & $distance_{init_1}$ & $distance_{init_2}$ & $velocity_{init}$ & $distance_{desired}$ & $velocity_{desired}$\\ \hline
+1           & 5.0        & 5.0        & 5.0      & 5.0          & 5.0   \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize within 50 ticks. (Boundary Case)}           \\ \hline
+2           & 10.0       & 10.0       & 5.0      & 5.0          & 10.0 \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize within 100 ticks. (Decrease distance, increase velocity)} \\ \hline \hline
+3           & 5.0        & 5.0        & 10.0     & 10.0         & 5.0   \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize within 100 ticks. (Increase distance, decrease velocity)} \\ \hline \hline
+4           & 10.0       & 10.0       & 10.0     & 5.0          & 5.0   \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize within 70 ticks. (Decrease both distance and velocity.)} \\ \hline \hline
+5           & 5.0        & 5.0        & 5.0      & 10.0         & 10.0  \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize within 90 ticks. (Increase both distance and velocity.)} \\ \hline \hline
+6           & 10.0       & 10.0       & 10.0     & 1.0          & 1.0         \\ \hline 
+Result & \multicolumn{5}{|c|}{The minimum distance between the cars is smaller than -10.0.} \\
+& \multicolumn{5}{|c|}{(Decrease both distance and velocity by a large amount.)} \\ \hline \hline
+7           & 1.0        & 1.0        & 1.0      & 10.0         & 10.0        \\ \hline
+Result & \multicolumn{5}{|c|}{The distance between the cars goes up to more than 50.} \\
+& \multicolumn{5}{|c|}{(Increase both distance and velocity by a large amount.)} \\ \hline \hline
+\end{tabular}
+\end{table}
+
+
+
+\subsection{System after tuning}
+As seen in Table \ref{tbl:cases-after}, the distances between the cars can
+still get to a very small value. The
+possibility of crash is not entirely eliminated. However, the system does
+improve on some boundary cases. Overall, our fuzzy inference engine 
+is effective at controlling the
+acceleration and deceleration of simulated cars. Our system 
+rarely allows collisions to occur and maintains the distance between adjacent cars.
+
+\begin{table}[ht]
+\centering
+\caption{Test Cases for System After Tuning} \label{tbl:cases-after}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Case Number & $distance_{init_1}$ & $distance_{init_2}$ & $velocity_{init}$ & $distance_{desired}$ & $velocity_{desired}$\\ \hline
+1           & 5.0        & 5.0        & 5.0      & 5.0          & 5.0   \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize instantaneously. (Boundary Case)}   \\ \hline \hline
+2           & 10.0       & 10.0       & 5.0      & 5.0          & 10.0 \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize within 100 ticks. (Decrease distance, increase velocity)} \\ \hline \hline
+3           & 5.0        & 5.0        & 10.0     & 10.0         & 5.0   \\ \hline
+Result & \multicolumn{5}{|c|}{Stabilize within 70 ticks. (Increase distance, decrease velocity)} \\ \hline \hline
+4           & 10.0       & 10.0       & 10.0     & 5.0          & 5.0   \\ \hline
+& \multicolumn{5}{|c|}{Stabilize within 70 ticks. (Decrease both distance and velocity.)} \\ \hline \hline
+5           & 5.0        & 5.0        & 5.0      & 10.0         & 10.0  \\ \hline
+& \multicolumn{5}{|c|}{Stabilize within 100 ticks. (Increase both distance and velocity.)} \\ \hline \hline
+6           & 10.0       & 10.0       & 10.0     & 1.0          & 1.0         \\ \hline 
+Result & \multicolumn{5}{|c|}{The minimum distance between the 2nd and 3rd is -2.4.} \\
+& \multicolumn{5}{|c|}{(Decrease both distance and velocity by a large amount.)} \\ \hline \hline
+7           & 1.0        & 1.0        & 1.0      & 10.0         & 10.0        \\ \hline
+Result & \multicolumn{5}{|c|}{The distance between the cars goes up to more than 30.8.} \\
+& \multicolumn{5}{|c|}{(Increase both distance and velocity by a large amount.)} \\ \hline \hline
+\end{tabular}
+\end{table}
+
+\clearpage
+\section{Extensibility}
+Our system has several possible directions for extending its functionality.
+Adding new cars simply requires expanding the list of colours in
+\java{Core.createCars()}. Up to a limit, new cars will be visible on the
+display.
+
+Since we experimented with both Gaussian and Triangular membership functions,
+both of these functions can be used. To change from one function to the other,
+you can change the functions that are created in
+\java{FuzzySetsManager.updateDesiredParameters()}.
+
+These quick add features allowed us to easily change some of the features of
+our system to either change our testing environment or to change some of the
+fundamental properties of our system.
+
+\section{Conclusions and Recommendations}
+% What do we conclude from this... if successful what did we do right,
+% if not successful what did we do wrong
+% What can we recommend to the future dammed?
+
+We have been reasonably successful applying fuzzy principles to the autonomous
+car problem. We are able to loosely define a system and don't require the
+precision of the systems used by Ranjitkar\cite{Ranjitkar}. Our system rarely
+produces crashes.
+
+We've experimented with different membership functions and found that
+Triangular membership functions work better than Gaussian. Although the Gaussian involved more
+complexity, we still found that our Triangular functions allowed our system to
+stabilize more quickly and prevented our cars from colliding.
+
+Additionally, from our experience building this system, we have several points
+of hindsight to confer. Primarily, it is essential to create a tuning framework
+for a fuzzy engine. The ability to modify the system at runtime allows for much
+faster iterations. This feature could have greatly improved development
+experience if it had been implemented from the beginning.
+
+The visualization of the membership functions was another debugging tool that
+proved useful. It was helpful being able to see what the functions we were 
+using looked like,
+instead of trying to infer the functions from a stream of data.
+
+If we were to further develop the system, runtime customization of the rule
+base and membership functions would be useful additions. Currently, the
+user can adjust the membership function parameters at runtime, but there is no
+facility to switch from one distribution to another (e.g. Gaussian to 
+Triangular). Additional membership function types could also be added. Trapezoidal would be
+a particularly good candidate to add, as suggested by Protzel \etal's choice 
+of Trapezoidal for two of their velocity membership functions 
+\cite{protzel-fuzzy}.
+
+From the perspective of how the application was
+programmed, it would beneficial for future maintenance, stability, 
+and consistency of the system to switch all UI elements
+to the Swing library and eliminate the use of the AWT widgets altogether. Furthermore,
+some refactoring of the classes currently implemented could 
+improve the modularity of the system.
+
+\clearpage
+\section{Starting and Running the Application}
+The application can be viewed as a Java web applet (recommended) or 
+run as a separate executable using \texttt{java} at the command line.
+Note that our application makes use of generics, and thus requires Java 5.
+
+\subsection{Starting the Java Applet}
+\begin{enumerate}
+  \item In the main project directory look for the file named \texttt{myapplet.html}.
+  \item Open this file in your favourite web browser --- preferably Mozilla Firefox.
+  \item If you do not have support for Java applets, you will need to install it now in order
+    to properly run the applet in the browser.
+\end{enumerate}
+
+\subsection{Starting the Java Application}
+\begin{enumerate}
+  \item On a Windows system, open the \java{runapplication.bat} script. On a
+      Unix-like system, open the \java{runapplication.sh} script.
+  \item Alternatively, to launch the application with \java{java} from our jar
+      file, run this command: \java{java -jar pysydelet.jar}
+  \item For more information see the README.txt file.
+\end{enumerate}
+
+\subsection{Guide to Running the Application}
+The car simulation is displayed at the top of the application window, 
+this will show the distances between the cars and 
+their relative positions. The bottom portion of the
+application is for user input. By default, the input boxes for desired
+velocity and distances will be displayed as well as the ``Start'' and
+``Go to Initial'' buttons.
+
+You may start the simulation at anytime using the ``Start'' button, this will
+then make use of the values currently entered in all the textboxes of the
+control panel. The ``Start'' button, after being pushed will turn into the 
+``Unpause''/``Pause'' button, which can then be used to pause and unpause the
+simulation at any time. Furthermore, you may change any of the textbox values
+at anytime. Changes to the initial velocity or distances will \textit{not} 
+affect the simulation if it is already running. Changes to the desired velocity
+or distance will update the simulation.
+
+The purpose of each textbox is labeled clearly: ``InitialVelocity'' refers to
+the initial velocity of all cars; ``DesiredVelocity'' refers to the goal velocity
+that all cars should evenutually settle at; ``InitialDistance1'' is the distance between
+cars one and two; ``InitialDistance2''is the distance between cars two and three; and
+``DesiredDistance'' is the distance all cars will eventually settle with between themselves
+and their adjacent car(s).
+
+% Back matter
+\bibliography{ref}
+
+\end{document}
