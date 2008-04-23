@@ -10,7 +10,7 @@ all:	tags run
 tags:	$(SRCS)
 	-ctags -R .
 
-run:	make.lib.stamp make.Generated.stamp
+run:	make.Generated.stamp
 	$(CC) $(FLAGS) $(MAIN)
 
 # run doctest for every py file except main
@@ -26,5 +26,4 @@ clean:
 	-rm *.pyc
 	-rm tags
 	-rm make.*.stamp
-	make -C lib clean
 	make -C Generated clean
