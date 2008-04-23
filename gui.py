@@ -16,7 +16,7 @@ class SomFontFrame(gui.FontFrame):
         self.som = glue.SelfOrgMapGlue(5, 1.0, 0.5)
 
         # fix output
-        self._updateOutput()
+        self._OnChangeSomState()
 
     def _selectOutput(self, i):
         self.selectedOutput = i
@@ -58,12 +58,17 @@ class SomFontFrame(gui.FontFrame):
         self.som.train( self.nEpochs.GetValue() )
 
         # recalculate output
-        self._updateOutput()
+        self._OnChangeSomState()
 
         wx.EndBusyCursor()
 
     def OnReset(self, event): # wxGlade: FontFrame.<event_handler>
         self.som.initializeSom()
+        self._OnChangeSomState()
+
+    def _OnChangeSomState(self):
+        self._updateOutput()
+        self._updateWeightImages()
 
     def _openFile(self, previousName):
         """Open an image file and return the filename"""
@@ -88,6 +93,17 @@ class SomFontFrame(gui.FontFrame):
     def _changeImage(self, inFilename):
         """Change the current letter image"""
         self.letterImage.SetBitmap(wx.Bitmap(inFilename, wx.BITMAP_TYPE_ANY))
+
+    def _updateWeightImages(self):
+        self.som.updateWeightImages()
+        self.weightImage_0.SetBitmap(wx.Bitmap("weight/0.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_1.SetBitmap(wx.Bitmap("weight/1.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_2.SetBitmap(wx.Bitmap("weight/2.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_3.SetBitmap(wx.Bitmap("weight/3.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_4.SetBitmap(wx.Bitmap("weight/4.png", wx.BITMAP_TYPE_ANY))
+        self.weightImage_5.SetBitmap(wx.Bitmap("weight/5.png", wx.BITMAP_TYPE_ANY))
+
+
 
 
 
