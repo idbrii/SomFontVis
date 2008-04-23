@@ -2,6 +2,12 @@
 
 from PIL import Image
 
+def getCharList():
+    return map(chr, range(ord('A'),ord('G'))) # characters [A-G) --> A..F
+def getFontList():
+    # add more fonts here
+    return 'DejaVuSans','NimbusRoman','TimesNewRoman'
+
 class Letter():
     """ Represents a letter of some font. You can get the width, height,
         and all of the pixel data """
@@ -46,12 +52,6 @@ class Letter():
         weight.putdata(weightData)
         weight.save(weightFilename)
 
-
-def getCharList():
-    return map(chr, range(ord('A'),ord('G'))) # characters [A-G) --> A..F
-def getFontList():
-    # add more fonts here
-    return 'DejaVuSans','NimbusRoman','TimesNewRoman'
 
 def createLetters():
     letters = []
