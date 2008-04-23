@@ -21,11 +21,18 @@ class Weight():
     def __init__(self, dim):
         self.dim = dim
         self.data = [0] * self.dim
+        self.randomize = self.randomize_random  # choose randomization method
+
     def __str__(self):
         return str(self.data[:8])
 
-    def randomize(self):
-        MAX = 255
+    def randomize_random(self):
+        MAX = 255   # max value of inputs
+        for w in range(len(self.data)):
+            self.data[w] = random.randint(0,MAX)
+
+    def randomize_sequential_random(self):
+        MAX = 255   # max value of inputs
         i = random.randint(0,MAX)
         for w in range(len(self.data)):
             self.data[w] = i
@@ -119,6 +126,15 @@ class SelfOrgMap():
         for t in range(nEpochs):
             self._trainSingleEpoch(letters, self.alphaGen.next())
 
+        self._writeWeights(letters)
+
+    def _writeWeights(self, letters):
+        letter = letters[0]
+        i = 0
+        for w in self.weights:
+            letter.saveWeight(i, w.data)
+            i += 1
+
     def _trainSingleEpoch(self, letters, alpha):
         if alpha == 0.0:
             print "Warning: Requested more epochs, but learning parameter is now zero. (t=%i)"%t
@@ -127,7 +143,7 @@ class SelfOrgMap():
         random.shuffle(letters) #in-place shuffle -> epoch's different from last
         for letter in letters:
             self._trainOnLetter(letter, alpha)
-        print '=== Used (key,cluster):'\
+        print '=== Used (cluster,nMatches):'\
             ,[(k,self.clustersUsed[k]) for k in self.clustersUsed.keys()]\
             ,'==='
 
@@ -154,7 +170,7 @@ class SelfOrgMap():
         smallest = self._findSmallest(result)
         try:
             self.clustersUsed[smallest] += 1
-        except:
+        except KeyError:
             self.clustersUsed[smallest] = 1
 
         # DEBUG: testing cheat to force good training

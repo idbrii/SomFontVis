@@ -33,6 +33,15 @@ class Letter():
         """ Save the image over the previous one """
         self.im.save(self.filename)
 
+    def saveWeight(self, i, weightData):
+        mode = 'L' # greyscale
+        size = self.im.size
+        weightFilename = 'weight/'+ str(i) +'.png'
+
+        weight = Image.new( mode, size )
+        weight.putdata(weightData)
+        weight.save(weightFilename)
+
 
 def getCharList():
     return map(chr, range(ord('A'),ord('G'))) # characters [A-G) --> A..F
@@ -44,7 +53,10 @@ def createLetters():
     letters = []
     for fFace in getFontList():
         for character in getCharList(): # the font chars
-            letters.append( Letter.Create(fFace, character) )
+            try:
+                letters.append( Letter.Create(fFace, character) )
+            except IOError:
+                print "Cannot find font face:", fFace, "character:", character
     return letters
 
 
