@@ -27,14 +27,20 @@ tidy:
 fixeps: 
 	for a in $(EPS_FILES); do epstopdf $$a; done
 
-$(FILE).pdf: $(FILE).dvi
-	dvipdf $^
+$(FILE).bbl: ref.bib
+	pdflatex $(FILE)
+	bibtex $(FILE)
+	pdflatex $(FILE)
+	pdflatex $(FILE)
 
-$(FILE).dvi: $(FILE).tex *.tex
-	texi2dvi -l latex $(FILE).tex
+$(FILE).pdf: $(FILE).tex $(FILE).bbl
+	pdflatex $<
 
-xpdf:
-	while :; do make $(PDF) && xpdf $(FILE).pdf || read; done
+#$(FILE).dvi: $(FILE).tex *.tex
+#	texi2dvi -l latex $(FILE).tex
+
+evince:
+	while :; do make $(PDF) && evince $(FILE).pdf || read; done
 
 open: $(FILE).pdf
 	open $(FILE).pdf
