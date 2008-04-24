@@ -33,7 +33,10 @@ $(FILE).bbl: ref.bib
 	pdflatex $(FILE)
 	pdflatex $(FILE)
 
-$(FILE).pdf: $(FILE).tex $(FILE).bbl
+$(FILE).pdf: $(FILE).tex diagrams/*.png $(FILE).bbl
+	pdflatex $<
+
+letter.pdf: letter.tex
 	pdflatex $<
 
 #$(FILE).dvi: $(FILE).tex *.tex

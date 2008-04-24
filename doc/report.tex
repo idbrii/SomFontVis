@@ -2,8 +2,6 @@
 \usepackage{fullpage,setspace,url,amsmath}
 \usepackage{graphicx}
 \usepackage{amssymb}
-\usepackage{epstopdf}
-\usepackage[parfill]{parskip}    
 \usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
 
 %%% Commands
@@ -46,17 +44,15 @@
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-\doublespacing
 
 
 \section{Introduction}
 % Explain some problem statements stuff here.
-The purpose of this project was to develop a self-organizing map that would train on a selection of characters with different font faces and cluster them into groups corresponding to each letter. We consider the letters A to F.
+The purpose of this project was to develop a self-organizing map that would train on a selection of characters with different font faces and cluster them into groups corresponding to each letter. We will only consider the letters A to F.
 
 \section{Objectives}
 % State objectives of the project in excruciating detail, yay!
 % Opportunities for citing references in absurd and wonderful ways?
-%\cite{Ranjitkar}
 
 \begin{enumerate}
 \item Produce some input data.
@@ -74,14 +70,17 @@ The fonts were taken from a word processor at 12 pt font and at 300\% zoom using
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=5in]{diagrams/font-screengrab.png}
+  \includegraphics[width=5in]{diagrams/font-screengrab}
   \caption{The source for the fonts.}
   \label{fig:font-screengrab}
 \end{figure}
 
-After this process, the inputs were roughly similar in size, but each pixel is represented by an RGB value. Also, the inputs must be the exact same size.
-
-The inputs were normalized by running them through \code{normalize.py} (\textit{see also the README.txt}). This program converted them to greyscale and stretched them to all be the same size.
+After this process, the inputs were roughly similar in size, but each pixel is
+represented by an RGB value. The RGB value provided more information than
+necessary since the images contained no colour, and the images had to be the
+exact same dimensions. These issues were fixed by running them through
+\code{normalize.py} (\textit{see also README.txt}). This program converted
+them to greyscale and stretched them to all be the same size.
 
 
 \subsection{Self-organizing map}
@@ -97,7 +96,7 @@ The interface displays what the current input looks like and the current output 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=180px]{diagrams/gui-plain.png} 
+  \includegraphics[width=180px]{diagrams/gui-plain} 
   \caption{The graphical user interface for inputting data into the self-organizing map. This screen shows the system initialized with random weights.}
   \label{fig:gui-plain}
 \end{figure}
@@ -106,7 +105,7 @@ The output displays the cluster that the self-organizing map has selected for th
 
 The user can select a new image for input or train the self-organizing map.
 
-Training will take all of the images in the \code{data} folder and pass them into the self-organizing map for the user's input number of epochs. The $\alpha$ function used for training is displayed in the bottom of the GUI. The user can modify the initial $\alpha$ or change the factor that $\alpha$ is scaled by on each training epoch. 
+Training will take all of the images in the \code{data} folder and pass them into the self-organizing map for the user's input number of epochs. The $\alpha(t)$ function used for training is displayed in the middle of the GUI. The user can modify $\alpha(0)$ or change the factor $k$ in $\alpha(t) = k\alpha(t-1)$ (how much \arfa~is scaled by on each training epoch). 
 
 Finally, the bottom of the window displays the 6 clusters visualized as images. Each image represents the elements in the weight for that cluster and they are laid out to look like the input images. This visualizer makes it easier to see how each weight compares to the input letter.
 
@@ -117,7 +116,7 @@ During training, there is additional output on the command-line to facilitate tu
 \end{verbatim}
 
 \subsection{Training the System}
-Training the system can be done through the user interface. The output visualizer and the additional epoch output can be used to determine the effectiveness of training. Additionally, the system uses a constant seed for the random number generator that initializes the weights so that all tests will use the same initial values. This allowed repeatability and removes a lot of guess work in testing.
+Training the system can be done through the user interface. The output visualizer and the additional epoch output can be used to determine the effectiveness of training. Additionally, the system uses a constant seed for the random number generator that initializes the weights so that all tests will use the same initial values. This allowed repeatability and removes a lot of guess work in testing. However, the inputs to the self-organizing map are selected at random so each training session may be different.
 
 \subsection{Testing the System}
 The user can select images to input into the system. The system will output a cluster in the range [1-6] that characterizes the image. The same letter (even in different font faces) should output the same cluster number.
@@ -128,10 +127,10 @@ The user can select images to input into the system. The system will output a cl
 
 
 \subsection{Initial Tests}
-I tried small values for $\alpha$: $\alpha(0) = 0.001, 0.01, 0.1$, but none of these values resulted in more than two weights being modified. The random values resulted in only one or two weights that are close to the appearance of the letters, and since the $\alpha$ value is so small, very little change resulted (even with large epochs).
+I tried small values for $\alpha(0)$: $\alpha(0) = 0.001, 0.01, 0.1$, but none of these values resulted in more than two weights being modified. The random values resulted in only one or two weights that are close to the appearance of the letters, and since the $\alpha(0)$ value is so small, very little change resulted (even with large epochs).
 
 \subsection{Training the System}
-Trying larger values for $\alpha$, I used $\alpha(0) = 1.0$ and $\alpha(t) = 0.8\alpha(t-1)$ and 10 epochs. This produced three clusters: 
+Trying larger values for $\alpha(0)$, I used $\alpha(0) = 1.0$ and $\alpha(t) = 0.8\alpha(t-1)$ and 10 epochs. This produced three clusters: 
 \begin{verbatim}
 (cluster number,number of matching inputs): [(0, 7), (1, 8), (5, 3)]
 \end{verbatim}
@@ -139,7 +138,7 @@ Trying larger values for $\alpha$, I used $\alpha(0) = 1.0$ and $\alpha(t) = 0.8
 The output visualizer shown in Figure \ref{fig:first-test} showed that the letter A was being captured very well, but all other letters were being grouped into only two other categories.
 
 \begin{figure}[ht]
-  \centering
+\centering
   \includegraphics[width=180px]{diagrams/first-test.png} 
   \caption{The output visualizer results for the first test.}
   \label{fig:first-test}
@@ -148,7 +147,7 @@ The output visualizer shown in Figure \ref{fig:first-test} showed that the lette
 Training for another 10 epochs resulting in another cluster being formed. Figure \ref{fig:second-test} illustrates how the new cluster strongly characterized C.
 
 \begin{figure}[ht]
-  \centering
+\centering
   \includegraphics[width=180px]{diagrams/second-test.png} 
   \caption{The output visualizer results for the second test.}
   \label{fig:second-test}
@@ -159,15 +158,16 @@ The first cluster appeared to characterize E most strongly but also B and D. The
 Training a third time swapped the first and fifth clusters.
 
 \begin{figure}[ht]
-  \centering
+\centering
   \includegraphics[width=180px]{diagrams/third-test.png} 
   \caption{The output visualizer results for the third test.}
   \label{fig:third-test}
 \end{figure}
 
-At this point, the system appeared to make no further progress in training. So I discarded this data and tried again. (The multistart method.)
+At this point, the system appeared to make no further progress in training. This iteration was a failure, so I discarded this data and tried again.
 
-After several attempts at training, the self-organizing map produced some good results. One one test, it produced five clusters after 10 epochs. The output visualizer in Figure \ref{fig:good-test} illustrates how A, C, and D are well captured by the system. E and F are strongly captured, but mixed with B and D.
+\subsection{Improved Results}
+After several more attempts at training, the self-organizing map produced some good results. One one test, it produced five clusters after 10 epochs. The output visualizer in Figure \ref{fig:good-test} illustrates how A, C, and D are well captured by the system. E and F are strongly captured, but mixed with B and D.
 
 \begin{figure}[ht]
   \centering
@@ -199,25 +199,25 @@ In an attempt to improve the character recognition, I changed the way weights ar
 \section{Conclusions}
 The self-organizing map is clearly useful in recognizing characters. However, it has difficulty separating very similar characters. In this regard, the self-organizing map suffers from the use of unsupervised learning. Since the self-organizing map has no information to distinguish an E from an F except for its past experiences, the two blend together and result in a common cluster. Distinct characters like A and C, on the other hand, are well captured by the self-organizing map. 
 
-It is not useful to use small values for \arfa. Using a larger value helps to create clusters quickly, but may train the self-organizing map too quickly on certain letters.
+It is not useful to use small values for $\alpha(0)$. Using a larger value helps to create clusters quickly, but may train the self-organizing map too quickly on certain letters.
 
 \section{Recommendations}
 Due to the self-organizing map's difficulty in separating some similar letters, some investigation into different techniques would be beneficial. Given the nature of the problem, it would be useful to use a supervised learning technique. We know each letter that we input, so we could provide the target data as well as the input data.
 
-The output for this self-organizing map was only six clusters, but it could be expanded to include more clusters. Having multiple clusters for each letter could help prevent multiple letters from being mapped to one cluster.
+The output for this self-organizing map was only six clusters, but it could be expanded to include more clusters. Having multiple clusters for each letter could help prevent multiple letters from being mapped to one cluster. Additionally, a neighbourhood function could be introduced to spread the effect of each match across the different weights.
 
-The initialization of the weights in the self-organizing map could be changed to find a better initial situation to match the letters against. Initializing the weights to match one of the inputs seems promising and it should be testing with a wider variety of font faces.
+The initialization of the weights in the self-organizing map could be changed to find a better initial situation to match the letters against. Initializing the weights to match one of the inputs seems promising and it should be tested with a wider variety of font faces.
 
 Finally, I would recommend expanding this solution to use the full alphabet and a greater number of fonts. I think that it would be interesting to see how many letters are confused and what extra preprocessing can be done to improve the recognition. Preprocessing filters such as sharpening the image (to increase the contrast), blurring the image (to increase the size of the gradient), and converting the image to black and white (instead of greyscale) offer interesting possibilities.
 
 \clearpage
 \section{Appendix: Starting and Running the Application}\label{apx:running}
 The application can be run as an executable using \texttt{python} at the command line.
-Note that my application requires Python 2.5.
+Note that my application requires Python 2.5 and some python libraries: PIL and wxpython.
 
 \subsection{Starting the Python Application}
 \begin{enumerate}
-  \item There are some dependencies required: python, wxpython, and PIL. Instructions for installing these can be found in README.txt.
+  \item There are some dependencies required: python, wxpython, and PIL. Instructions for installing these can be found in README.txt in the Dependencies section.
   \item On a Windows system, open the \code{runapplication.bat} script. On a
       Unix-like system, open the \code{runapplication.sh} script.
   \item For more information see the README.txt file.
