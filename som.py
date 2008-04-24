@@ -140,9 +140,8 @@ class SelfOrgMap():
         random.shuffle(letters) #in-place shuffle -> epoch's different from last
         for letter in letters:
             self._trainOnLetter(letter, alpha)
-        print '=== Used (cluster,nMatches):'\
-            ,[(k,self.clustersUsed[k]) for k in self.clustersUsed.keys()]\
-            ,'==='
+        print '(cluster number,number of matching inputs):'\
+            ,[(k,self.clustersUsed[k]) for k in self.clustersUsed.keys()]
 
     def _scaleAlpha(self, alpha):
         alpha *= 0.7    # scale alpha
