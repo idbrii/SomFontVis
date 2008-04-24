@@ -81,7 +81,7 @@ The fonts were taken from a word processor at 12 pt font and at 300\% zoom using
 
 After this process, the inputs were roughly similar in size, but each pixel is represented by an RGB value. Also, the inputs must be the exact same size.
 
-The inputs were normalized by running them through \code{normalize.py}. This program converted them to greyscale and stretched them to all be the same size.
+The inputs were normalized by running them through \code{normalize.py} (\textit{see also the README.txt}). This program converted them to greyscale and stretched them to all be the same size.
 
 
 \subsection{Self-organizing map}
@@ -217,14 +217,11 @@ Note that my application requires Python 2.5.
 
 \subsection{Starting the Python Application}
 \begin{enumerate}
+  \item There are some dependencies required: python, wxpython, and PIL. Instructions for installing these can be found in README.txt.
   \item On a Windows system, open the \code{runapplication.bat} script. On a
       Unix-like system, open the \code{runapplication.sh} script.
   \item For more information see the README.txt file.
 \end{enumerate}
-
-\subsection{Guide to Running the Application}
-
-\section{Appendix: normalize.py}\label{apx:running}
 
 % Back matter
 %\bibliography{ref}
